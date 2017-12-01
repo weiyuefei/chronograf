@@ -423,3 +423,7 @@ export const DEFAULT_SOURCE = {
   insecureSkipVerify: false,
   metaUrl: '',
 }
+
+// Source types
+export const INFLUX_ENTERPRISE = 'influx-enterprise'
+export const INFLUX_OSS = 'influx'

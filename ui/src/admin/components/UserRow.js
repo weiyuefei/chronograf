@@ -10,23 +10,23 @@ import ConfirmButtons from 'shared/components/ConfirmButtons'
 import DeleteConfirmTableCell from 'shared/components/DeleteConfirmTableCell'
 import ChangePassRow from 'src/admin/components/ChangePassRow'
 import {USERS_TABLE} from 'src/admin/constants/tableSizing'
+import {INFLUX_ENTERPRISE} from 'shared/constants/index'
 
 const UserRow = ({
   user: {name, roles = [], permissions, password},
   user,
-  allRoles,
-  allPermissions,
-  hasRoles,
   isNew,
-  isEditing,
   onEdit,
   onSave,
+  source,
+  allRoles,
   onCancel,
   onDelete,
-  onUpdatePermissions,
+  isEditing,
   onUpdateRoles,
+  allPermissions,
   onUpdatePassword,
-  isEnterpriseButNotReally,
+  onUpdatePermissions,
 }) => {
   const handleUpdatePermissions = perms => {
     const allowed = perms.map(p => p.name)
@@ -56,8 +56,7 @@ const UserRow = ({
           onSave={onSave}
           isNew={isNew}
         />
-        {hasRoles &&
-          !isEnterpriseButNotReally &&
+        {source.type === INFLUX_ENTERPRISE &&
           <td className="admin-table--left-offset">--</td>}
         <td className="admin-table--left-offset">--</td>
         <td
@@ -88,8 +87,7 @@ const UserRow = ({
           buttonSize="btn-xs"
         />
       </td>
-      {hasRoles &&
-        !isEnterpriseButNotReally &&
+      {source.type === INFLUX_ENTERPRISE &&
         <td>
           <MultiSelectDropdown
             items={allRoles}
@@ -149,9 +147,11 @@ UserRow.propTypes = {
     ),
     password: string,
   }).isRequired,
+  source: shape({
+    type: string.isRequired,
+  }),
   allRoles: arrayOf(shape()),
   allPermissions: arrayOf(string),
-  hasRoles: bool,
   isNew: bool,
   isEditing: bool,
   onCancel: func,
@@ -161,7 +161,6 @@ UserRow.propTypes = {
   onUpdatePermissions: func,
   onUpdateRoles: func,
   onUpdatePassword: func,
-  isEnterpriseButNotReally: bool,
 }
 
 export default UserRow

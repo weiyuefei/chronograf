@@ -29,6 +29,7 @@ import SourceIndicator from 'shared/components/SourceIndicator'
 import FancyScrollbar from 'shared/components/FancyScrollbar'
 
 import {publishAutoDismissingNotification} from 'shared/dispatchers'
+import {INFLUX_ENTERPRISE} from 'shared/constants'
 
 const isValidUser = user => {
   const minLen = 3
@@ -50,7 +51,7 @@ class AdminPage extends Component {
 
     loadUsers(source.links.users)
     loadPermissions(source.links.permissions)
-    if (source.links.roles) {
+    if (source.type === INFLUX_ENTERPRISE) {
       loadRoles(source.links.roles)
     }
   }
@@ -142,7 +143,6 @@ class AdminPage extends Component {
       filterUsers,
       filterRoles,
     } = this.props
-    const hasRoles = !!source.links.roles
     const globalPermissions = permissions.find(p => p.scope === 'all')
     const allowed = globalPermissions ? globalPermissions.allowed : []
 
@@ -166,7 +166,6 @@ class AdminPage extends Component {
                     users={users}
                     roles={roles}
                     source={source}
-                    hasRoles={hasRoles}
                     permissions={allowed}
                     onFilterUsers={filterUsers}
                     onFilterRoles={filterRoles}

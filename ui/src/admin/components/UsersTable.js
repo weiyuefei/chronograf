@@ -3,13 +3,14 @@ import React, {PropTypes} from 'react'
 import UserRow from 'src/admin/components/UserRow'
 import EmptyRow from 'src/admin/components/EmptyRow'
 import FilterBar from 'src/admin/components/FilterBar'
+import {INFLUX_ENTERPRISE} from 'shared/constants/index'
 
 const UsersTable = ({
   users,
   onEdit,
   onSave,
+  source,
   allRoles,
-  hasRoles,
   onCancel,
   onDelete,
   onFilter,
@@ -19,7 +20,6 @@ const UsersTable = ({
   onUpdateRoles,
   onUpdatePassword,
   onUpdatePermissions,
-  isEnterpriseButNotReally,
 }) =>
   <div className="panel panel-default">
     <FilterBar
@@ -34,8 +34,7 @@ const UsersTable = ({
           <tr>
             <th>User</th>
             <th>Password</th>
-            {hasRoles &&
-              !isEnterpriseButNotReally &&
+            {source.type === INFLUX_ENTERPRISE &&
               <th className="admin-table--left-offset">Roles</th>}
             <th className="admin-table--left-offset">Permissions</th>
             <th />
@@ -49,11 +48,11 @@ const UsersTable = ({
                   <UserRow
                     key={user.links.self}
                     user={user}
+                    source={source}
                     onEdit={onEdit}
                     onSave={onSave}
                     isNew={user.isNew}
                     allRoles={allRoles}
-                    hasRoles={hasRoles}
                     onCancel={onCancel}
                     onDelete={onDelete}
                     isEditing={user.isEditing}
@@ -61,7 +60,6 @@ const UsersTable = ({
                     onUpdateRoles={onUpdateRoles}
                     onUpdatePassword={onUpdatePassword}
                     onUpdatePermissions={onUpdatePermissions}
-                    isEnterpriseButNotReally={isEnterpriseButNotReally}
                   />
                 )
             : <EmptyRow tableName={'Users'} />}
@@ -89,6 +87,9 @@ UsersTable.propTypes = {
       ),
     })
   ),
+  source: shape({
+    type: string.isRequired,
+  }),
   isEditing: bool,
   onClickCreate: func.isRequired,
   onEdit: func.isRequired,
@@ -98,11 +99,9 @@ UsersTable.propTypes = {
   onFilter: func,
   allRoles: arrayOf(shape()),
   permissions: arrayOf(string),
-  hasRoles: bool.isRequired,
   onUpdatePermissions: func,
   onUpdateRoles: func,
   onUpdatePassword: func,
-  isEnterpriseButNotReally: bool,
 }
 
 export default UsersTable

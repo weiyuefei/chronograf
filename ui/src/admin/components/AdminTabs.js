@@ -4,13 +4,13 @@ import UsersTable from 'src/admin/components/UsersTable'
 import RolesTable from 'src/admin/components/RolesTable'
 import QueriesPage from 'src/admin/containers/QueriesPage'
 import DatabaseManagerPage from 'src/admin/containers/DatabaseManagerPage'
+import {INFLUX_ENTERPRISE} from 'shared/constants'
 
 const AdminTabs = ({
   users,
   roles,
   permissions,
   source,
-  hasRoles,
   isEditingUsers,
   isEditingRoles,
   onClickCreate,
@@ -30,9 +30,6 @@ const AdminTabs = ({
   onUpdateUserPermissions,
   onUpdateUserPassword,
 }) => {
-  const isEnterpriseButNotReally =
-    source.type === 'influx-enterprise' && !source.metaUrl
-
   let tabs = [
     {
       type: 'Databases',
@@ -43,8 +40,8 @@ const AdminTabs = ({
       component: (
         <UsersTable
           users={users}
+          source={source}
           allRoles={roles}
-          hasRoles={hasRoles}
           onSave={onSaveUser}
           onEdit={onEditUser}
           onDelete={onDeleteUser}
@@ -56,7 +53,6 @@ const AdminTabs = ({
           onUpdateRoles={onUpdateUserRoles}
           onUpdatePassword={onUpdateUserPassword}
           onUpdatePermissions={onUpdateUserPermissions}
-          isEnterpriseButNotReally={isEnterpriseButNotReally}
         />
       ),
     },
@@ -85,7 +81,7 @@ const AdminTabs = ({
     },
   ]
 
-  if (!hasRoles || isEnterpriseButNotReally) {
+  if (source.type === INFLUX_ENTERPRISE) {
     tabs = tabs.filter(t => t.type !== 'Roles')
   }
 
@@ -140,7 +136,6 @@ AdminTabs.propTypes = {
   onFilterUsers: func.isRequired,
   onUpdateRoleUsers: func.isRequired,
   onUpdateRolePermissions: func.isRequired,
-  hasRoles: bool.isRequired,
   onUpdateUserPermissions: func,
   onUpdateUserRoles: func,
   onUpdateUserPassword: func,
