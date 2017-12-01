@@ -30,6 +30,9 @@ const AdminTabs = ({
   onUpdateUserPermissions,
   onUpdateUserPassword,
 }) => {
+  const isEnterpriseButNotReally =
+    source.type === 'influx-enterprise' && !source.metaUrl
+
   let tabs = [
     {
       type: 'Databases',
@@ -42,17 +45,18 @@ const AdminTabs = ({
           users={users}
           allRoles={roles}
           hasRoles={hasRoles}
-          permissions={permissions}
-          isEditing={isEditingUsers}
           onSave={onSaveUser}
-          onCancel={onCancelEditUser}
-          onClickCreate={onClickCreate}
           onEdit={onEditUser}
           onDelete={onDeleteUser}
           onFilter={onFilterUsers}
-          onUpdatePermissions={onUpdateUserPermissions}
+          permissions={permissions}
+          isEditing={isEditingUsers}
+          onCancel={onCancelEditUser}
+          onClickCreate={onClickCreate}
           onUpdateRoles={onUpdateUserRoles}
           onUpdatePassword={onUpdateUserPassword}
+          onUpdatePermissions={onUpdateUserPermissions}
+          isEnterpriseButNotReally={isEnterpriseButNotReally}
         />
       ),
     },
@@ -81,7 +85,7 @@ const AdminTabs = ({
     },
   ]
 
-  if (!hasRoles) {
+  if (!hasRoles || isEnterpriseButNotReally) {
     tabs = tabs.filter(t => t.type !== 'Roles')
   }
 

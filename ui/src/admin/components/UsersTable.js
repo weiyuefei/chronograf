@@ -6,19 +6,20 @@ import FilterBar from 'src/admin/components/FilterBar'
 
 const UsersTable = ({
   users,
-  allRoles,
-  hasRoles,
-  permissions,
-  isEditing,
-  onClickCreate,
   onEdit,
   onSave,
+  allRoles,
+  hasRoles,
   onCancel,
   onDelete,
   onFilter,
-  onUpdatePermissions,
+  isEditing,
+  permissions,
+  onClickCreate,
   onUpdateRoles,
   onUpdatePassword,
+  onUpdatePermissions,
+  isEnterpriseButNotReally,
 }) =>
   <div className="panel panel-default">
     <FilterBar
@@ -33,7 +34,9 @@ const UsersTable = ({
           <tr>
             <th>User</th>
             <th>Password</th>
-            {hasRoles && <th className="admin-table--left-offset">Roles</th>}
+            {hasRoles &&
+              !isEnterpriseButNotReally &&
+              <th className="admin-table--left-offset">Roles</th>}
             <th className="admin-table--left-offset">Permissions</th>
             <th />
           </tr>
@@ -48,16 +51,17 @@ const UsersTable = ({
                     user={user}
                     onEdit={onEdit}
                     onSave={onSave}
-                    onCancel={onCancel}
-                    onDelete={onDelete}
-                    isEditing={user.isEditing}
                     isNew={user.isNew}
                     allRoles={allRoles}
                     hasRoles={hasRoles}
+                    onCancel={onCancel}
+                    onDelete={onDelete}
+                    isEditing={user.isEditing}
                     allPermissions={permissions}
-                    onUpdatePermissions={onUpdatePermissions}
                     onUpdateRoles={onUpdateRoles}
                     onUpdatePassword={onUpdatePassword}
+                    onUpdatePermissions={onUpdatePermissions}
+                    isEnterpriseButNotReally={isEnterpriseButNotReally}
                   />
                 )
             : <EmptyRow tableName={'Users'} />}
@@ -98,6 +102,7 @@ UsersTable.propTypes = {
   onUpdatePermissions: func,
   onUpdateRoles: func,
   onUpdatePassword: func,
+  isEnterpriseButNotReally: bool,
 }
 
 export default UsersTable

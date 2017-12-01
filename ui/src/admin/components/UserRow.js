@@ -26,6 +26,7 @@ const UserRow = ({
   onUpdatePermissions,
   onUpdateRoles,
   onUpdatePassword,
+  isEnterpriseButNotReally,
 }) => {
   const handleUpdatePermissions = perms => {
     const allowed = perms.map(p => p.name)
@@ -55,7 +56,9 @@ const UserRow = ({
           onSave={onSave}
           isNew={isNew}
         />
-        {hasRoles ? <td className="admin-table--left-offset">--</td> : null}
+        {hasRoles &&
+          !isEnterpriseButNotReally &&
+          <td className="admin-table--left-offset">--</td>}
         <td className="admin-table--left-offset">--</td>
         <td
           className="text-right"
@@ -85,21 +88,21 @@ const UserRow = ({
           buttonSize="btn-xs"
         />
       </td>
-      {hasRoles
-        ? <td>
-            <MultiSelectDropdown
-              items={allRoles}
-              selectedItems={roles.map(r => ({name: r.name}))}
-              label={roles.length ? '' : 'Select Roles'}
-              onApply={handleUpdateRoles}
-              buttonSize="btn-xs"
-              buttonColor="btn-primary"
-              customClass={classnames(`dropdown-${USERS_TABLE.colRoles}`, {
-                'admin-table--multi-select-empty': !roles.length,
-              })}
-            />
-          </td>
-        : null}
+      {hasRoles &&
+        !isEnterpriseButNotReally &&
+        <td>
+          <MultiSelectDropdown
+            items={allRoles}
+            selectedItems={roles.map(r => ({name: r.name}))}
+            label={roles.length ? '' : 'Select Roles'}
+            onApply={handleUpdateRoles}
+            buttonSize="btn-xs"
+            buttonColor="btn-primary"
+            customClass={classnames(`dropdown-${USERS_TABLE.colRoles}`, {
+              'admin-table--multi-select-empty': !roles.length,
+            })}
+          />
+        </td>}
       <td>
         {allPermissions && allPermissions.length
           ? <MultiSelectDropdown
@@ -158,6 +161,7 @@ UserRow.propTypes = {
   onUpdatePermissions: func,
   onUpdateRoles: func,
   onUpdatePassword: func,
+  isEnterpriseButNotReally: bool,
 }
 
 export default UserRow
