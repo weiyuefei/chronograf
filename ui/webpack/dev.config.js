@@ -22,6 +22,7 @@ const babelLoader = {
 }
 
 module.exports = {
+  mode: 'development',
   node: {
     fs: 'empty',
     module: 'empty',

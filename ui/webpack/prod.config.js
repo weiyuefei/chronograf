@@ -18,6 +18,7 @@ const babelLoader = {
 }
 
 const config = {
+  mode: 'production',
   node: {
     fs: 'empty',
     module: 'empty',
