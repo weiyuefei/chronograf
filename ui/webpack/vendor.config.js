@@ -4,6 +4,7 @@ const packages = require('../package.json')
 const dependencies = packages.dependencies
 
 module.exports = {
+  mode: 'development',
   node: {
     fs: 'empty',
     module: 'empty',

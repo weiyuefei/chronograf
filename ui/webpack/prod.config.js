@@ -54,7 +54,7 @@ const config = {
         'memoizerific.js'
       ),
     ],
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
         exclude: [/node_modules/, /(_s|S)pec\.js$/],
@@ -116,7 +116,6 @@ const config = {
       VERSION: JSON.stringify(require('../package.json').version),
       'process.env.NODE_ENV': JSON.stringify('production'),
     }),
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new ForkTsCheckerWebpackPlugin({
       checkSyntacticErrors: true,
     }),
@@ -129,26 +128,7 @@ const config = {
         },
       },
     }),
-    new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-    }),
     new ExtractTextPlugin('chronograf.css'),
-    new UglifyJsPlugin({
-      parallel: true,
-      uglifyOptions: {
-        ie8: false,
-      },
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks(module) {
-        return module.context && module.context.indexOf('node_modules') >= 0
-      },
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest',
-    }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '..', 'src', 'index.template.html'),
       inject: 'body',
