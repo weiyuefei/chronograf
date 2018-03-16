@@ -23,16 +23,36 @@ class TableGraph extends Component {
     this.state = {
       hoveredColumnIndex: NULL_COLUMN_INDEX,
       hoveredRowIndex: NULL_ROW_INDEX,
+      invisibleFieldIndices: [],
     }
   }
 
   componentWillMount() {
     this._data = [[]]
+    this._visibleData = [[]]
   }
 
   componentWillUpdate(nextProps) {
+    const {tableOptions} = nextProps
     const {data} = timeSeriesToTableGraph(nextProps.data)
     this._data = data
+    const {columnNames, verticalTimeAxis} = tableOptions
+
+    if (verticalTimeAxis) {
+      const visibleColumns = {}
+      const visibleData = data.map((row, i) => {
+        return row.filter((col, j) => {
+          if (i === 0) {
+            const foundColumn = columnNames.find(
+              column => column.internalName === col
+            )
+            visibleColumns[j] = foundColumn && foundColumn.visible
+          }
+          return visibleColumns[j]
+        })
+      })
+      this._visibleData = visibleData[0].length ? visibleData : [[]]
+    }
   }
 
   calcHoverTimeRow = (data, hoverTime) =>
@@ -63,12 +83,14 @@ class TableGraph extends Component {
   }
 
   cellRenderer = ({columnIndex, rowIndex, key, style, parent}) => {
-    const data = this._data
+    const visibleData = this._visibleData
+
+    const {tableOptions} = this.props
     const {hoveredColumnIndex, hoveredRowIndex} = this.state
 
-    const columnCount = _.get(data, ['0', 'length'], 0)
-    const rowCount = data.length
-    const {tableOptions} = this.props
+    const columnCount = _.get(visibleData, ['0', 'length'], 0)
+    const rowCount = visibleData.length
+
     const timeFormat = tableOptions
       ? tableOptions.timeFormat
       : TIME_FORMAT_DEFAULT
@@ -76,9 +98,13 @@ class TableGraph extends Component {
       ? tableOptions.columnNames
       : [TIME_COLUMN_DEFAULT]
 
+    const timeField = columnNames.find(
+      column => column.internalName === TIME_COLUMN_DEFAULT.internalName
+    )
+
     const isFixedRow = rowIndex === 0 && columnIndex > 0
     const isFixedColumn = rowIndex > 0 && columnIndex === 0
-    const isTimeData = isFixedColumn
+    const isTimeData = rowIndex > 0 && columnIndex === 0 && timeField.visible
     const isFixedCorner = rowIndex === 0 && columnIndex === 0
     const isLastRow = rowIndex === rowCount - 1
     const isLastColumn = columnIndex === columnCount - 1
@@ -98,7 +124,7 @@ class TableGraph extends Component {
       'table-graph-cell__numerical': dataIsNumerical,
     })
 
-    const cellData = data[rowIndex][columnIndex]
+    const cellData = visibleData[rowIndex][columnIndex]
     const foundColumn = columnNames.find(
       column => column.internalName === cellData
     )
@@ -122,9 +148,10 @@ class TableGraph extends Component {
   render() {
     const {hoveredColumnIndex, hoveredRowIndex} = this.state
     const {hoverTime, tableOptions} = this.props
+    const visibleData = this._visibleData
     const data = this._data
-    const columnCount = _.get(data, ['0', 'length'], 0)
-    const rowCount = data.length
+    const columnCount = _.get(visibleData, ['0', 'length'], 0)
+    const rowCount = visibleData.length
     const COLUMN_WIDTH = 300
     const ROW_HEIGHT = 30
     const tableWidth = this.gridContainer ? this.gridContainer.clientWidth : 0
@@ -137,7 +164,7 @@ class TableGraph extends Component {
         ref={gridContainer => (this.gridContainer = gridContainer)}
         onMouseOut={this.handleMouseOut}
       >
-        {!isEmpty(data) &&
+        {!isEmpty(visibleData) &&
           <MultiGrid
             columnCount={columnCount}
             columnWidth={COLUMN_WIDTH}

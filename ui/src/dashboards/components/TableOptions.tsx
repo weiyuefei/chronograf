@@ -31,6 +31,7 @@ type Color = {
 type TableColumn = {
   internalName: string
   displayName: string
+  visible: boolean
 }
 
 type Options = {
@@ -88,7 +89,7 @@ export class TableOptions extends PureComponent<Props, {}> {
             const existing = columnNames.find(
               c => c.internalName === internalName
             )
-            return existing || {internalName, displayName: ''}
+            return existing || {internalName, displayName: '', visible: true}
           })
         })
       ),
@@ -116,7 +117,7 @@ export class TableOptions extends PureComponent<Props, {}> {
 
   handleToggleTextWrapping = () => {}
 
-  handleColumnRename = column => {
+  handleColumnUpdate = column => {
     const {handleUpdateTableOptions, tableOptions} = this.props
     const {columnNames} = tableOptions
     const updatedColumns = columnNames.map(
@@ -173,7 +174,7 @@ export class TableOptions extends PureComponent<Props, {}> {
           </div>
           <GraphOptionsCustomizeColumns
             columns={columns}
-            onColumnRename={this.handleColumnRename}
+            onColumnUpdate={this.handleColumnUpdate}
           />
           <GraphOptionsThresholds
             onAddThreshold={this.handleAddThreshold}
