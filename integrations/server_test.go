@@ -548,7 +548,9 @@ func TestServer(t *testing.T) {
 				"verticalTimeAxis": false,
 				"sortBy":{
 					"internalName": "",
-					"displayName": ""},
+					"displayName": "",
+					"visible": false
+				},
 				"wrapping": "",
 				"columnNames": null
 			},
@@ -796,7 +798,8 @@ func TestServer(t *testing.T) {
 						"verticalTimeAxis":false,
 						"sortBy":{
 							"internalName":"",
-							"displayName":""
+							"displayName":"",
+							"visible":false
 						},
 						"wrapping":"",
 						"columnNames":null
