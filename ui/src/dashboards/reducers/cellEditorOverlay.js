@@ -5,8 +5,9 @@ import {
   validateGaugeColors,
   validateSingleStatColors,
   getSingleStatType,
-  initializeOptions,
 } from 'src/dashboards/constants/gaugeColors'
+
+import {initializeOptions} from 'src/shared/constants/tableGraph'
 
 export const initialState = {
   cell: null,
