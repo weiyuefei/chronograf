@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import _ from 'lodash'
 import classnames from 'classnames'
 
+import {MultiGrid} from 'react-virtualized'
+import moment from 'moment'
+
 import {timeSeriesToTableGraph} from 'src/utils/timeSeriesToDygraph'
 import {
   NULL_COLUMN_INDEX,
@@ -11,9 +14,7 @@ import {
   TIME_FORMAT_DEFAULT,
   TIME_COLUMN_DEFAULT,
 } from 'src/shared/constants/tableGraph'
-
-import {MultiGrid} from 'react-virtualized'
-import moment from 'moment'
+import {generateThresholdsListHexs} from 'shared/constants/colorOperations'
 
 const isEmpty = data => data.length <= 1
 
@@ -38,9 +39,10 @@ class TableGraph extends Component {
     this._data = data
     const {columnNames, verticalTimeAxis} = tableOptions
 
+    let visibleData = [[]]
     if (verticalTimeAxis) {
       const visibleColumns = {}
-      const visibleData = data.map((row, i) => {
+      visibleData = data.map((row, i) => {
         return row.filter((col, j) => {
           if (i === 0) {
             const foundColumn = columnNames.find(
@@ -51,8 +53,8 @@ class TableGraph extends Component {
           return visibleColumns[j]
         })
       })
-      this._visibleData = visibleData[0].length ? visibleData : [[]]
     }
+    this._visibleData = visibleData[0].length ? visibleData : [[]]
   }
 
   calcHoverTimeRow = (data, hoverTime) =>
@@ -84,9 +86,10 @@ class TableGraph extends Component {
 
   cellRenderer = ({columnIndex, rowIndex, key, style, parent}) => {
     const visibleData = this._visibleData
-
-    const {tableOptions} = this.props
+    const {colors, tableOptions} = this.props
     const {hoveredColumnIndex, hoveredRowIndex} = this.state
+
+    const cellData = visibleData[rowIndex][columnIndex]
 
     const columnCount = _.get(visibleData, ['0', 'length'], 0)
     const rowCount = visibleData.length
@@ -112,7 +115,19 @@ class TableGraph extends Component {
       rowIndex === parent.props.scrollToRow ||
       (rowIndex === hoveredRowIndex && hoveredRowIndex !== 0) ||
       (columnIndex === hoveredColumnIndex && hoveredColumnIndex !== 0)
-    const dataIsNumerical = _.isNumber([rowIndex][columnIndex])
+    const dataIsNumerical = _.isNumber(cellData)
+
+    let cellStyle = style
+
+    if (!isFixedRow && !isFixedColumn && !isFixedCorner) {
+      const {bgColor, textColor} = generateThresholdsListHexs(colors, cellData)
+
+      cellStyle = {
+        ...style,
+        backgroundColor: bgColor,
+        color: textColor,
+      }
+    }
 
     const cellClass = classnames('table-graph-cell', {
       'table-graph-cell__fixed-row': isFixedRow,
@@ -124,7 +139,6 @@ class TableGraph extends Component {
       'table-graph-cell__numerical': dataIsNumerical,
     })
 
-    const cellData = visibleData[rowIndex][columnIndex]
     const foundColumn = columnNames.find(
       column => column.internalName === cellData
     )
@@ -134,7 +148,7 @@ class TableGraph extends Component {
     return (
       <div
         key={key}
-        style={style}
+        style={cellStyle}
         className={cellClass}
         onMouseOver={this.handleHover(columnIndex, rowIndex)}
       >
@@ -147,9 +161,9 @@ class TableGraph extends Component {
 
   render() {
     const {hoveredColumnIndex, hoveredRowIndex} = this.state
-    const {hoverTime, tableOptions} = this.props
-    const visibleData = this._visibleData
+    const {hoverTime, tableOptions, colors} = this.props
     const data = this._data
+    const visibleData = this._visibleData
     const columnCount = _.get(visibleData, ['0', 'length'], 0)
     const rowCount = visibleData.length
     const COLUMN_WIDTH = 300
@@ -187,6 +201,7 @@ class TableGraph extends Component {
             hoveredColumnIndex={hoveredColumnIndex}
             hoveredRowIndex={hoveredRowIndex}
             hoverTime={hoverTime}
+            colors={colors}
           />}
       </div>
     )
@@ -201,6 +216,15 @@ TableGraph.propTypes = {
   tableOptions: shape({}),
   hoverTime: string,
   onSetHoverTime: func,
+  colors: arrayOf(
+    shape({
+      type: string.isRequired,
+      hex: string.isRequired,
+      id: string.isRequired,
+      name: string.isRequired,
+      value: string.isRequired,
+    }).isRequired
+  ),
 }
 
 export default TableGraph
