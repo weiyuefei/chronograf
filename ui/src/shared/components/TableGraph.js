@@ -53,6 +53,13 @@ class TableGraph extends Component {
           return visibleColumns[j]
         })
       })
+    } else {
+      visibleData = data.filter(row => {
+        const foundField = columnNames.find(
+          column => column.internalName === row[0]
+        )
+        return foundField && foundField.visible
+      })
     }
     this._visibleData = visibleData[0].length ? visibleData : [[]]
   }
