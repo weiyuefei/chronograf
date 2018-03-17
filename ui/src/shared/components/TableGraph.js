@@ -12,11 +12,36 @@ import {
   NULL_ROW_INDEX,
   NULL_HOVER_TIME,
   TIME_FORMAT_DEFAULT,
-  TIME_COLUMN_DEFAULT,
+  TIME_FIELD_DEFAULT,
 } from 'src/shared/constants/tableGraph'
 import {generateThresholdsListHexs} from 'shared/constants/colorOperations'
 
 const isEmpty = data => data.length <= 1
+
+const filterInvisibleRows = (data, verticalTimeAxis, fieldNames) => {
+  let visibleData = [[]]
+  if (verticalTimeAxis) {
+    const visibleColumns = {}
+    visibleData = data.map((row, i) => {
+      return row.filter((col, j) => {
+        if (i === 0) {
+          const foundField = fieldNames.find(
+            field => field.internalName === col
+          )
+          visibleColumns[j] = foundField && foundField.visible
+        }
+        return visibleColumns[j]
+      })
+    })
+  } else {
+    visibleData = data.filter(row => {
+      const foundField = fieldNames.find(field => field.internalName === row[0])
+      return foundField && foundField.visible
+    })
+  }
+
+  return visibleData[0].length ? visibleData : [[]]
+}
 
 class TableGraph extends Component {
   constructor(props) {
@@ -24,7 +49,6 @@ class TableGraph extends Component {
     this.state = {
       hoveredColumnIndex: NULL_COLUMN_INDEX,
       hoveredRowIndex: NULL_ROW_INDEX,
-      invisibleFieldIndices: [],
     }
   }
 
@@ -37,31 +61,8 @@ class TableGraph extends Component {
     const {tableOptions} = nextProps
     const {data} = timeSeriesToTableGraph(nextProps.data)
     this._data = data
-    const {columnNames, verticalTimeAxis} = tableOptions
-
-    let visibleData = [[]]
-    if (verticalTimeAxis) {
-      const visibleColumns = {}
-      visibleData = data.map((row, i) => {
-        return row.filter((col, j) => {
-          if (i === 0) {
-            const foundColumn = columnNames.find(
-              column => column.internalName === col
-            )
-            visibleColumns[j] = foundColumn && foundColumn.visible
-          }
-          return visibleColumns[j]
-        })
-      })
-    } else {
-      visibleData = data.filter(row => {
-        const foundField = columnNames.find(
-          column => column.internalName === row[0]
-        )
-        return foundField && foundField.visible
-      })
-    }
-    this._visibleData = visibleData[0].length ? visibleData : [[]]
+    const {fieldNames, verticalTimeAxis} = tableOptions
+    this._visibleData = filterInvisibleRows(data, verticalTimeAxis, fieldNames)
   }
 
   calcHoverTimeRow = (data, hoverTime) =>
@@ -104,12 +105,12 @@ class TableGraph extends Component {
     const timeFormat = tableOptions
       ? tableOptions.timeFormat
       : TIME_FORMAT_DEFAULT
-    const columnNames = tableOptions
-      ? tableOptions.columnNames
-      : [TIME_COLUMN_DEFAULT]
+    const fieldNames = tableOptions
+      ? tableOptions.fieldNames
+      : [TIME_FIELD_DEFAULT]
 
-    const timeField = columnNames.find(
-      column => column.internalName === TIME_COLUMN_DEFAULT.internalName
+    const timeField = fieldNames.find(
+      field => field.internalName === TIME_FIELD_DEFAULT.internalName
     )
 
     const isFixedRow = rowIndex === 0 && columnIndex > 0
@@ -146,11 +147,9 @@ class TableGraph extends Component {
       'table-graph-cell__numerical': dataIsNumerical,
     })
 
-    const foundColumn = columnNames.find(
-      column => column.internalName === cellData
-    )
-    const columnName =
-      foundColumn && (foundColumn.displayName || foundColumn.internalName)
+    const foundField = fieldNames.find(field => field.internalName === cellData)
+    const fieldName =
+      foundField && (foundField.displayName || foundField.internalName)
 
     return (
       <div
@@ -161,7 +160,7 @@ class TableGraph extends Component {
       >
         {isTimeData
           ? `${moment(cellData).format(timeFormat)}`
-          : columnName || `${cellData}`}
+          : fieldName || `${cellData}`}
       </div>
     )
   }
@@ -200,8 +199,8 @@ class TableGraph extends Component {
             timeFormat={
               tableOptions ? tableOptions.timeFormat : TIME_FORMAT_DEFAULT
             }
-            columnNames={
-              tableOptions ? tableOptions.columnNames : [TIME_COLUMN_DEFAULT]
+            fieldNames={
+              tableOptions ? tableOptions.fieldNames : [TIME_FIELD_DEFAULT]
             }
             scrollToRow={hoverTimeRow}
             cellRenderer={this.cellRenderer}

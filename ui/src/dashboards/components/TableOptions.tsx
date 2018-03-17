@@ -9,14 +9,14 @@ import GraphOptionsTimeFormat from 'src/dashboards/components/GraphOptionsTimeFo
 import GraphOptionsTimeAxis from 'src/dashboards/components/GraphOptionsTimeAxis'
 import GraphOptionsSortBy from 'src/dashboards/components/GraphOptionsSortBy'
 import GraphOptionsTextWrapping from 'src/dashboards/components/GraphOptionsTextWrapping'
-import GraphOptionsCustomizeColumns from 'src/dashboards/components/GraphOptionsCustomizeColumns'
+import GraphOptionsCustomizeFields from 'src/dashboards/components/GraphOptionsCustomizeFields'
 import ThresholdsList from 'src/shared/components/ThresholdsList'
 import ThresholdsListTypeToggle from 'src/shared/components/ThresholdsListTypeToggle'
 
-import {TIME_COLUMN_DEFAULT} from 'src/shared/constants/tableGraph'
+import {TIME_FIELD_DEFAULT} from 'src/shared/constants/tableGraph'
 import {updateTableOptions} from 'src/dashboards/actions/cellEditorOverlay'
 
-type TableColumn = {
+type RenamableField = {
   internalName: string
   displayName: string
   visible: boolean
@@ -25,9 +25,9 @@ type TableColumn = {
 type Options = {
   timeFormat: string
   verticalTimeAxis: boolean
-  sortBy: TableColumn
+  sortBy: RenamableField
   wrapping: string
-  columnNames: TableColumn[]
+  fieldNames: RenamableField[]
 }
 
 type QueryConfig = {
@@ -54,19 +54,19 @@ export class TableOptions extends PureComponent<Props, {}> {
 
   componentWillMount() {
     const {queryConfigs, handleUpdateTableOptions, tableOptions} = this.props
-    const {columnNames} = tableOptions
-    const timeColumn =
-      (columnNames && columnNames.find(c => c.internalName === 'time')) ||
-      TIME_COLUMN_DEFAULT
+    const {fieldNames} = tableOptions
+    const timeField =
+      (fieldNames && fieldNames.find(c => c.internalName === 'time')) ||
+      TIME_FIELD_DEFAULT
 
-    const columns = [
-      timeColumn,
+    const fields = [
+      timeField,
       ..._.flatten(
         queryConfigs.map(qc => {
           const {measurement, fields} = qc
           return fields.map(f => {
             const internalName = `${measurement}.${f.alias}`
-            const existing = columnNames.find(
+            const existing = fieldNames.find(
               c => c.internalName === internalName
             )
             return existing || {internalName, displayName: '', visible: true}
@@ -75,7 +75,7 @@ export class TableOptions extends PureComponent<Props, {}> {
       ),
     ]
 
-    handleUpdateTableOptions({...tableOptions, columnNames: columns})
+    handleUpdateTableOptions({...tableOptions, fieldNames: fields})
   }
 
   handleChooseSortBy = () => {}
@@ -89,20 +89,17 @@ export class TableOptions extends PureComponent<Props, {}> {
 
   handleToggleTextWrapping = () => {}
 
-  handleColumnUpdate = column => {
+  handleFieldUpdate = field => {
     const {handleUpdateTableOptions, tableOptions} = this.props
-    const {columnNames} = tableOptions
-    const updatedColumns = columnNames.map(
-      op => (op.internalName === column.internalName ? column : op)
+    const {fieldNames} = tableOptions
+    const updatedFields = fieldNames.map(
+      op => (op.internalName === field.internalName ? field : op)
     )
-    handleUpdateTableOptions({...tableOptions, columnNames: updatedColumns})
+    handleUpdateTableOptions({...tableOptions, fieldNames: updatedFields})
   }
 
   render() {
-    const {
-      tableOptions: {timeFormat, columnNames: columns},
-      onResetFocus,
-    } = this.props
+    const {tableOptions: {timeFormat, fieldNames}, onResetFocus} = this.props
 
     const TimeAxis = 'vertical'
 
@@ -137,9 +134,9 @@ export class TableOptions extends PureComponent<Props, {}> {
               onToggleTextWrapping={this.handleToggleTextWrapping}
             />
           </div>
-          <GraphOptionsCustomizeColumns
-            columns={columns}
-            onColumnUpdate={this.handleColumnUpdate}
+          <GraphOptionsCustomizeFields
+            fields={fieldNames}
+            onFieldUpdate={this.handleFieldUpdate}
           />
           <ThresholdsList showListHeading={true} onResetFocus={onResetFocus} />
           <div className="form-group-wrapper graph-options-group">

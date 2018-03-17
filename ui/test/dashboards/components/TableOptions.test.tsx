@@ -7,7 +7,7 @@ import GraphOptionsTimeFormat from 'src/dashboards/components/GraphOptionsTimeFo
 import GraphOptionsTimeAxis from 'src/dashboards/components/GraphOptionsTimeAxis'
 import GraphOptionsSortBy from 'src/dashboards/components/GraphOptionsSortBy'
 import GraphOptionsTextWrapping from 'src/dashboards/components/GraphOptionsTextWrapping'
-import GraphOptionsCustomizeColumns from 'src/dashboards/components/GraphOptionsCustomizeColumns'
+import GraphOptionsCustomizeFields from 'src/dashboards/components/GraphOptionsCustomizeFields'
 import ThresholdsList from 'src/shared/components/ThresholdsList'
 import ThresholdsListTypeToggle from 'src/shared/components/ThresholdsListTypeToggle'
 
@@ -22,7 +22,7 @@ const setup = (override = {}) => {
       verticalTimeAxis: true,
       sortBy: {internalName: '', displayName: '', visible: true},
       wrapping: '',
-      columnNames: [],
+      fieldNames: [],
     },
     onResetFocus: () => {},
     ...override,
@@ -42,8 +42,8 @@ describe('Dashboards.Components.TableOptions', () => {
       const graphOptionsTimeAxis = wrapper.find(GraphOptionsTimeAxis)
       const graphOptionsSortBy = wrapper.find(GraphOptionsSortBy)
       const graphOptionsTextWrapping = wrapper.find(GraphOptionsTextWrapping)
-      const graphOptionsCustomizeColumns = wrapper.find(
-        GraphOptionsCustomizeColumns
+      const graphOptionsCustomizeFields = wrapper.find(
+        GraphOptionsCustomizeFields
       )
       const thresholdsList = wrapper.find(ThresholdsList)
       const thresholdsListTypeToggle = wrapper.find(ThresholdsListTypeToggle)
@@ -53,7 +53,7 @@ describe('Dashboards.Components.TableOptions', () => {
       expect(graphOptionsTimeAxis.exists()).toBe(true)
       expect(graphOptionsSortBy.exists()).toBe(true)
       expect(graphOptionsTextWrapping.exists()).toBe(true)
-      expect(graphOptionsCustomizeColumns.exists()).toBe(true)
+      expect(graphOptionsCustomizeFields.exists()).toBe(true)
       expect(thresholdsList.exists()).toBe(true)
       expect(thresholdsListTypeToggle.exists()).toBe(true)
     })
